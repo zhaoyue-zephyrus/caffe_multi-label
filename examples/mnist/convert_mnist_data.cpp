@@ -17,6 +17,7 @@
 
 #include <fstream>  // NOLINT(readability/streams)
 #include <string>
+#include <iostream>
 
 #include "caffe/proto/caffe.pb.h"
 
@@ -101,6 +102,8 @@ void convert_dataset(const char* image_filename, const char* label_filename,
   // Storing to db
   char label;
   char* pixels = new char[rows * cols];
+  int vec_label[10];
+  memset(vec_label, 0, sizeof(vec_label));
   int count = 0;
   const int kMaxKeyLength = 10;
   char key_cstr[kMaxKeyLength];
@@ -110,13 +113,19 @@ void convert_dataset(const char* image_filename, const char* label_filename,
   datum.set_channels(1);
   datum.set_height(rows);
   datum.set_width(cols);
+  for (int label_i = 0; label_i < 10; ++label_i) {
+    datum.add_label(0);
+  }
   LOG(INFO) << "A total of " << num_items << " items.";
   LOG(INFO) << "Rows: " << rows << " Cols: " << cols;
   for (int item_id = 0; item_id < num_items; ++item_id) {
     image_file.read(pixels, rows * cols);
-    label_file.read(&label, 1);
     datum.set_data(pixels, rows*cols);
-    datum.set_label(label);
+    label_file.read(&label, 1);
+    vec_label[static_cast<int>(label)] = 1;
+    for (int label_i = 0; label_i < 10; ++label_i)
+      datum.set_label(label_i,vec_label[label_i]);
+    memset(vec_label, 0, sizeof(vec_label));
     snprintf(key_cstr, kMaxKeyLength, "%08d", item_id);
     datum.SerializeToString(&value);
     string keystr(key_cstr);

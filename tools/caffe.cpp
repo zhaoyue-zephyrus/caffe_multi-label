@@ -116,6 +116,7 @@ int train() {
     solver->net()->CopyTrainedLayersFrom(FLAGS_weights);
     solver->Solve();
   } else {
+    LOG(INFO) << "Training from scratch..";
     solver->Solve();
   }
   LOG(INFO) << "Optimization Done.";

@@ -68,6 +68,8 @@ void DataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       << top[0]->channels() << "," << top[0]->height() << ","
       << top[0]->width();
   // label
+  printf("Go here\n");
+  printf("%d\n", this->layer_param_.data_param().label_size());
   if (this->output_labels_) {
     top[1]->Reshape(this->layer_param_.data_param().batch_size(), this->layer_param_.data_param().label_size(), 1, 1);
     this->prefetch_label_.Reshape(this->layer_param_.data_param().batch_size(),

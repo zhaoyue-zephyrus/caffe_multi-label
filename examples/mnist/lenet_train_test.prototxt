@@ -14,6 +14,7 @@ layer {
     source: "examples/mnist/mnist_train_lmdb"
     batch_size: 64
     backend: LMDB
+    label_size: 10
   }
 }
 layer {
@@ -31,6 +32,7 @@ layer {
     source: "examples/mnist/mnist_test_lmdb"
     batch_size: 100
     backend: LMDB
+    label_size: 10
   }
 }
 layer {
@@ -160,9 +162,15 @@ layer {
   }
 }
 layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
+  name: "prob"
+  type: "Softmax"
   bottom: "ip2"
+  top: "prob"
+}
+layer {
+  name: "loss"
+  type: "MultinomialLogisticLoss"
+  bottom: "prob"
   bottom: "label"
   top: "loss"
 }
