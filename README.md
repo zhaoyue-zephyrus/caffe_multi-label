@@ -6,9 +6,15 @@ The framework is based on the 2nd release candidate of Caffe 1.0.(See here: http
 caffe.proto has been modified to allow multi-label.
 
 A simple demo on MNIST:
+
 1. Download mnist
+
  > ./data/mnist/get_mnist.sh
+
 2. Convert mnist
+
  > ./examples/mnist/create_mnist.sh
+
 3. Train the LeNet model
+
  > ./examples/mnist/train_lenet.sh
