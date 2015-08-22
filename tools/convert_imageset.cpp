@@ -93,6 +93,7 @@ int main(int argc, char** argv) {
   }
   lines.push_back(std::make_pair(filename, vec_label));
 std::cout << "The length of label is " << label_size;
+vec_label.clear();
 while (infile >> filename) {
 for (int label_i = 0; label_i < label_size; ++label_i){
 int x;
