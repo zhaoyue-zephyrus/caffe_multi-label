@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <fstream>  // NOLINT(readability/streams)
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,6 +43,21 @@ DEFINE_bool(encoded, false,
 DEFINE_string(encode_type, "",
     "Optional: What type should we encode the image as ('png','jpg',...).");
 
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
+}
+
+std::vector<std::string> split(const std::string &s, char delim){
+  std::vector<std::string> elems;
+  split(s, delim, elems);
+  return elems;
+}
+
 int main(int argc, char** argv) {
   ::google::InitGoogleLogging(argv[0]);
 
@@ -68,52 +84,30 @@ int main(int argc, char** argv) {
   const string encode_type = FLAGS_encode_type;
 
   std::ifstream infile(argv[2]);
-  std::vector<std::pair<std::string, std::vector<int> > > lines;
-  std::string filename;
-  std::vector<int> vec_label;
-  //int label;
-  // Retrieve the first line to determine the length of the label
-  char first_line[1024];
-  std::cin.getline(first_line,1024);
-  int label_size = 0;
-  std::vector<int> space_pos;
-  for (int i = 0; i< 1024; ++i){
-    if (first_line[i]==' '){
-      ++label_size;
-      space_pos.push_back(i);
+  std::vector<std::pair<std::string, std::vector<double> > > lines;
+  for (std::string line; std::getline(infile, line); ) {
+    std::string filename;
+    std::vector<double> labels;
+    std::vector<std::string> x = split(line, ' ');
+    filename = x[0];
+    x.erase(x.begin());
+    for (int i = 0; i < x.size(); ++i){
+      labels.push_back(atof(x[i].c_str()));
     }
-    if (label_size==1) {
-      filename.assign(first_line,i);
-    }
-    else {
-      std::string s;
-      s.assign(first_line,space_pos.size()-1, space_pos.size());
-      vec_label.push_back(atoi(s.c_str()));
-    }
+    lines.push_back(std::make_pair(filename, labels));
   }
-  lines.push_back(std::make_pair(filename, vec_label));
-std::cout << "The length of label is " << label_size;
-vec_label.clear();
-while (infile >> filename) {
-for (int label_i = 0; label_i < label_size; ++label_i){
-int x;
-infile >> x;
-vec_label.push_back(x);
-}
-lines.push_back(std::make_pair(filename, vec_label));
-vec_label.clear();
-}
-if (FLAGS_shuffle) {
-// randomly shuffle data
-LOG(INFO) << "Shuffling data";
-shuffle(lines.begin(), lines.end());
-}
-LOG(INFO) << "A total of " << lines.size() << " images.";
 
-if (encode_type.size() && !encoded)
-LOG(INFO) << "encode_type specified, assuming encoded=true.";
+  if (FLAGS_shuffle) {
+    // randomly shuffle data
+    LOG(INFO) << "Shuffling data";
+    shuffle(lines.begin(), lines.end());
+  }
+  LOG(INFO) << "A total of " << lines.size() << " images.";
 
-int resize_height = std::max<int>(0, FLAGS_resize_height);
+  if (encode_type.size() && !encoded)
+    LOG(INFO) << "encode_type specified, assuming encoded=true.";
+
+  int resize_height = std::max<int>(0, FLAGS_resize_height);
   int resize_width = std::max<int>(0, FLAGS_resize_width);
 
   // Create new DB
