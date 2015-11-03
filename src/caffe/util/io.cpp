@@ -133,7 +133,7 @@ bool ReadImageToDatum(const string& filename, const std::vector<double> label,
       return true;
     }
     CVMatToDatum(cv_img, datum);
-    datum->mutable_label()->Clear();
+    datum->clear_label();
     for (int label_i = 0; label_i < label.size(); ++label_i){
       datum->add_label(label[label_i]);
     }
